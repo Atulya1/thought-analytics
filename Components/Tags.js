@@ -1,73 +1,93 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity} from 'react-native';
+import {getAllTags, getAllTagsWithQuestionCount} from "../service/tag-service.js";
 
 const TagListScreen = () => {
-    const tagsData = [
-        { title: 'javascript', questions: '2521175', askedToday: '202', thisWeek: '1179' },
-        { title: 'python', questions: '2178644', askedToday: '298', thisWeek: '1756' },
-        { title: 'java', questions: '1912779', askedToday: '132', thisWeek: '643' },
-        { title: 'c#', questions: '1609501', askedToday: '111', thisWeek: '611' },
-        { title: 'php', questions: '1462973', askedToday: '53', thisWeek: '336' },
-        { title: 'android', questions: '1414170', askedToday: '102', thisWeek: '524' },
-        { title: 'c++', questions: '1234567', askedToday: '89', thisWeek: '456' }, // Only showing 7 tags as an example
-        { title: 'javascript', questions: '2521175', askedToday: '202', thisWeek: '1179' },
-        { title: 'python', questions: '2178644', askedToday: '298', thisWeek: '1756' },
-        { title: 'java', questions: '1912779', askedToday: '132', thisWeek: '643' },
-        { title: 'c#', questions: '1609501', askedToday: '111', thisWeek: '611' },
-        { title: 'php', questions: '1462973', askedToday: '53', thisWeek: '336' },
-        { title: 'android', questions: '1414170', askedToday: '102', thisWeek: '524' },
-        { title: 'c++', questions: '1234567', askedToday: '89', thisWeek: '456' }
-    ];
-    const TagItem = ({ title, questions}) => (
+    const [tags, setTags] = useState(null);
+    const [sortType, setSortType] = useState("all")
+    const [loading, setLoading] = useState(true)
+    const [render, setRender] = useState("render")
+    useEffect(() => {
+        setLoading(true);
+        if(sortType === "all") {
+            getAllTagsWithQuestionCount()
+                .then((response) => {
+                    setTags(response);
+                })
+                .catch((error) => {
+                    console.error('Error fetching questions:', error);
+                }).finally(() => {
+                setLoading(false);
+            });
+        } else if (sortType === "name") {
+            const sortedTagsByName = [...tags].sort((a, b) => a.name.localeCompare(b.name));
+            setTags(sortedTagsByName);
+        } else if (sortType === "popular") {
+            const sortedTagsByPopularity = [...tags].sort((a, b) => b.questions - a.questions);
+            setTags(sortedTagsByPopularity);
+        }
+    }, [render, sortType])
+
+    const TagItem = ({ name, questions}) => (
         <View style={styles.tagItem}>
-            <Text style={styles.tagTitle}>{title}</Text>
+            <Text style={styles.tagTitle}>{name}</Text>
             <Text style={styles.tagQuestions}>{questions} questions</Text>
         </View>
     );
+
+    const sort = (sortType) => {
+        console.log(sortType)
+        if (sortType === "popular") {
+            setSortType("popular");
+        } else if (sortType === "name") {
+            setSortType("name")
+        } else if (sortType === "all") {
+            setSortType("all");
+        }
+    }
     const SortButtons = () => (
         <View style={styles.sortButtonsContainer}>
             <TouchableOpacity style={styles.sortButton} onPress={() => sort("all")}>
                 <Text style={styles.sortButtonText}>All</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.sortButton} onPress={() => sort("newest")}>
+            <TouchableOpacity style={styles.sortButton} onPress={() => sort("popular")}>
                 <Text style={styles.sortButtonText}>Popular</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.sortButton} onPress={() => sort("active")}>
+            <TouchableOpacity style={styles.sortButton} onPress={() => sort("name")}>
                 <Text style={styles.sortButtonText}>Name</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.sortButton} onPress={() => sort("unanswered")}>
-                <Text style={styles.sortButtonText}>Unanswered</Text>
             </TouchableOpacity>
         </View>
     );
     return (
-        <ScrollView style={styles.container}>
+        <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Tags</Text>
-                <Text style={styles.headerSubtitle}>A tag is a keyword or label that categorizes your question with other, similar questions.</Text>
+                <SortButtons/>
                 <TextInput style={styles.searchInput} placeholder="Filter by tag name" />
             </View>
+        <ScrollView>
+
             <View style={styles.tagsContainer}>
-                {tagsData.map((tag, index) => (
+                {tags !=null ? tags.map((tag) => (
                     <TagItem
-                        key={index}
-                        title={tag.title}
+                        key={tag._id}
+                        name={tag.name}
                         questions={tag.questions}
                     />
-                ))}
+                )) : ""}
             </View>
         </ScrollView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: '#fff',
     },
     header: {
         padding: 10,
-        backgroundColor: '#fff',
+        backgroundColor: '#F0F8FF',
         borderBottomWidth: 1,
         borderBottomColor: '#e1e1e1',
     },
@@ -82,13 +102,14 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     searchInput: {
-        fontSize: 16,
+        fontSize: 14,
         backgroundColor: '#fff',
         padding: 8,
         borderRadius: 4,
         borderWidth: 1,
         borderColor: '#ddd',
-        marginBottom: 16,
+        marginBottom: 5,
+        marginTop: 5,
     },
     tagsContainer: {
         flexDirection: 'row',
@@ -119,6 +140,22 @@ const styles = StyleSheet.create({
     tagAsked: {
         fontSize: 14,
         color: 'grey',
+    },
+    sortButtonsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        paddingVertical: 10,
+        backgroundColor: '#f8f8f8',
+        borderBottomWidth: 1,
+        borderBottomColor: '#e1e1e1',
+    },
+    sortButton: {
+        // You may need to adjust padding based on your layout and screen size
+        paddingHorizontal: 10,
+    },
+    sortButtonText: {
+        fontSize: 14,
+        color: '#007aff',
     },
 });
 

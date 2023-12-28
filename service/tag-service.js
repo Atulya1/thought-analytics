@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = "http://192.168.1.152:8000";
 const TAG_API = `${API_BASE}/api/tag`;
 
 const request = axios.create({
@@ -9,6 +9,11 @@ const request = axios.create({
 
 export const getAllTags = async () => {
     const response = await axios.get(`${TAG_API}/allTags`);
+    return response.data.responseMessage;
+}
+
+export const getAllTagsWithQuestionCount = async () => {
+    const response = await axios.get(`${TAG_API}/allTagsWithQuestions`);
     return response.data.responseMessage;
 }
 

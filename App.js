@@ -2,7 +2,15 @@ import * as React from 'react';
 import { Button, View } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
-import {ProfileScreen, QuestionsScreen, TagsScreen, LogoutScreen, SignUpScreen, TagListScreen} from "./Components";
+import {
+    ProfileScreen,
+    QuestionsScreen,
+    TagsScreen,
+    LogoutScreen,
+    SignUpScreen,
+    TagListScreen,
+    AskQuestionScreen
+} from "./Components";
 import {WelcomePage} from "./Components/Welcome";
 import { RootSiblingParent } from 'react-native-root-siblings';
 import SignUp from "./Components/User/SignUpComponent";
@@ -41,12 +49,13 @@ export default function App() {
         <NavigationContainer>
             <Drawer.Navigator initialRouteName="Home">
                 <Drawer.Screen name="Home" component={WelcomePage} />
-                <Drawer.Screen name="Profile" component={UserProfile} />
+                <Drawer.Screen name="ProfileScreen" component={UserProfile} />
+                <Drawer.Screen name="Ask Question" component={AskQuestionScreen} />
                 <Drawer.Screen name="Questions" component={QuestionsScreen} />
                 <Drawer.Screen name="Tags" component={ForumPost} />
                 <Drawer.Screen name="TagListScreen" component={TagListScreen} />
                 <Drawer.Screen name="SignUp" component={SignUpForm} />
-                <Drawer.Screen name="Logout" component={WelcomePage} />
+                <Drawer.Screen name="Logout" component={LogoutScreen} />
                 <Drawer.Screen name="Login" component={LoginComponent} />
             </Drawer.Navigator>
         </NavigationContainer>

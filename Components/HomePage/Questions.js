@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput} from 'react-native';
 import {getAllQuestion, getFilteredQuestions, getFilteredQuestionsByTag} from "../../service/question-service";
 import {formatDateMetadata, sortByActive} from "../../service/utils";
 
@@ -35,9 +35,6 @@ const QuestionList = () => {
                     setLoading(false);
                 });
         }
-        // } else {
-
-        // }
     }, [sortType, tagName])
 
     const sort = (sortType) => {
@@ -86,13 +83,18 @@ const QuestionList = () => {
     );
 
     return (
-        <FlatList
+        <View style={styles.list}>
+            <View style={styles.header}>
+                <SortButtons/>
+                <TextInput style={styles.searchInput} placeholder="Search Question..." />
+            </View>
+            <FlatList
             data={questions}
             renderItem={({item}) => <QuestionItem {...item} />}
             keyExtractor={(item) => item._id}
-            ListHeaderComponent={SortButtons}
             style={styles.list}
         />
+        </View>
     )
 };
 
@@ -100,6 +102,12 @@ const styles = StyleSheet.create({
     list: {
         flex: 1,
         backgroundColor: '#fff',
+    },
+    header: {
+        padding: 10,
+        backgroundColor: '#F0F8FF',
+        borderBottomWidth: 1,
+        borderBottomColor: '#e1e1e1',
     },
     questionItem: {
         borderBottomWidth: 1,
@@ -148,6 +156,16 @@ const styles = StyleSheet.create({
     sortButtonText: {
         fontSize: 14,
         color: '#007aff',
+    },
+    searchInput: {
+        fontSize: 14,
+        backgroundColor: '#fff',
+        padding: 8,
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        marginTop: 5,
+        marginBottom: 5,
     },
 });
 

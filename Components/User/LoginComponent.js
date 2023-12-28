@@ -1,46 +1,104 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import {
+    View,
+    Text,
+    TextInput,
+    StyleSheet,
+    TouchableOpacity,
+    Image,
+    KeyboardAvoidingView,
+    ScrollView, Platform
+} from 'react-native';
+import { userLogin } from "../../service/user-service";
+import { useNavigation } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import {Keyboard, TouchableWithoutFeedback} from "react-native-web";
+
+const initialValue = {
+    username: '',
+    password: ''
+}
 
 const LoginScreen = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [user, setUser] = useState(initialValue);
+    const { username, password } = user;
+    const [errorMessage, setErrorMessage] = useState('');
 
-    // Placeholder for logo, replace with your logo import
-   // const logo = require('./path-to-your-logo.png');
+    const navigation = useNavigation();
+    const onValueChange = (key, value) => {
+        setUser({ ...user, [key]: value });
+    }
 
-    const handleLogin = () => {
-        // Implement login logic
-    };
+    const addUserDetails = async () => {
+        console.log(user)
+        const response = await userLogin(user);
+        console.log(response);
+        if (response.responseCode === 200) {
+            console.log(response.responseMessage._id);
+            navigation.navigate('ProfileScreen');
+        } else {
+            setErrorMessage(response.responseMessage);
+            alert(response.responseMessage);
+        }
+    }
 
     return (
-        <View style={styles.container}>
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} // Adjust the value as needed
+            extraScrollHeight={Platform.OS === 'ios' ? 50 : 0} // Adjust the value as needed
+        >
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View>
+                        <TouchableOpacity
+                            style={[styles.button, styles.buttonGoogle]}
+                        >
+                            <Text style={styles.buttonText}>
+                                Log in with Google
+                            </Text>
+                        </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.button, styles.buttonGoogle]}>
-                <Text style={styles.buttonText}>Log in with Google</Text>
-            </TouchableOpacity>
+                        <TextInput
+                            placeholder="Username"
+                            value={username}
+                            onChangeText={(text) =>
+                                onValueChange('username', text)
+                            }
+                            style={styles.input}
+                        />
+                        <TextInput
+                            placeholder="Password"
+                            value={password}
+                            onChangeText={(text) =>
+                                onValueChange('password', text)
+                            }
+                            secureTextEntry
+                            style={styles.input}
+                        />
 
-            <TextInput
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                style={styles.input}
-            />
+                        <TouchableOpacity
+                            onPress={addUserDetails}
+                            style={styles.loginButton}
+                        >
+                            <Text style={styles.loginButtonText}>Log in</Text>
+                        </TouchableOpacity>
 
-            <TextInput
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                style={styles.input}
-            />
-
-            <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
-                <Text style={styles.loginButtonText}>Log in</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.signUpText}>Don’t have an account? <Text style={styles.linkText}>Sign up</Text></Text>
-            <Text style={styles.signUpText}>Are you an employer? <Text style={styles.linkText}>Sign up on Talent</Text></Text>
-        </View>
+                        <Text style={styles.signUpText}>
+                            Don’t have an account?{' '}
+                            <Text style={styles.linkText}>Sign up</Text>
+                        </Text>
+                        <Text style={styles.signUpText}>
+                            Are you an employer?{' '}
+                            <Text style={styles.linkText}>
+                                Sign up on Talent
+                            </Text>
+                        </Text>
+                    </View>
+                </TouchableWithoutFeedback>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 };
 
@@ -51,6 +109,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         padding: 20,
         backgroundColor: '#FFF',
+    },
+    scrollContainer: {
+       // flex: 1,
+        justifyContent: 'center',
+        padding: 20,
     },
     logo: {
         // Logo size might need to be adjusted depending on your image

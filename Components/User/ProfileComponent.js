@@ -1,61 +1,46 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Questions from "../HomePage/Questions";
+import {getAllQuestion, getFilteredQuestionsByTag} from "../../service/question-service";
+import {getCurrentUserAccount} from "../../service/user-service";
+import {formatDateMetadata} from "../../service/utils";
 
 const UserProfile = () => {
+    const [user, setUser] = useState("");
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        setLoading(true);
+        getCurrentUserAccount().then((response) => {
+            if(response.responseCode === 200) {
+                setUser(response.responseMessage)
+            }
+        })
+    }, [])
 
-    // You would typically fetch this data from an API or your state management store
-    const userData = {
-        name: 'Atul Kumar',
-        handle: '@atul2012atul',
-        location: 'Delhi, India',
-        birthdate: 'Born April 14, 1996',
-        joinDate: 'Joined April 2013',
-        followingCount: 37,
-        followersCount: 9,
-        profileImage: 'atul.JPG', // replace with actual image path or URL
-        // ... other user data
-    };
-
-    const post = {
-        author: 'Atul Kumar',
-        handle: '@atul2012atul',
-        date: 'Sep 16',
-        content: "I'm attending React Summit US 2023 - get your free remote ticket and join me there with 1500 other engineers and 60+ great speakers #ReactSummitUS",
-        linkTitle: 'Check out my badge & claim your free React Summit US 2023 ticket',
-        link: 'portal.gitnation.org/badges/react-s...',
-        // ... other post data
-    };
+    const calculateDays = (time) => {
+        const registrationDate = new Date(time);
+        const currentDate = new Date();
+        return Math.floor((currentDate - registrationDate) / (24 * 60 * 60 * 1000));
+    }
 
     return (
         <ScrollView style={styles.container}>
             <View style={styles.header}>
-                <Image source={{ uri: './atul.JPG' }} style={styles.profileImage} />
-                <Text style={styles.name}>{userData.name}</Text>
-                <Text style={styles.handle}>{userData.handle}</Text>
-                <TouchableOpacity style={styles.editProfileButton}>
-                    <Text style={styles.editProfileButtonText}>Edit profile</Text>
-                </TouchableOpacity>
+                <Image source={require('./atul.jpeg')} style={styles.profileImage} />
+                <Text style={styles.name}>{user.firstName} {user.lastName}</Text>
+                <Text style={styles.handle}>{user.username}</Text>
+                {/*<TouchableOpacity style={styles.editProfileButton}>*/}
+                {/*    <Text style={styles.editProfileButtonText}>Edit profile</Text>*/}
+                {/*</TouchableOpacity>*/}
             </View>
 
             <View style={styles.userDetails}>
-                <Text style={styles.detailText}>{userData.location}</Text>
-                <Text style={styles.detailText}>{userData.birthdate}</Text>
-                <Text style={styles.detailText}>{userData.joinDate}</Text>
-                <View style={styles.followInfo}>
-                    <Text style={styles.followCount}>{userData.followingCount} Following</Text>
-                    <Text style={styles.followCount}>{userData.followersCount} Followers</Text>
-                </View>
-            </View>
-
-            {/* Tabs for Posts, Replies, etc. */}
-            {/* ... (tabs component here) */}
-
-            {/* Post Content */}
-            <View style={styles.postContainer}>
-                <Text style={styles.postAuthor}>{post.author} {post.handle} • {post.date}</Text>
-                <Text style={styles.postContent}>{post.content}</Text>
-                <Text style={styles.postLink}>{post.linkTitle}</Text>
+                <Text style={styles.detailText}>Joined : {formatDateMetadata(user.registration_date_time)}</Text>
+                <Text style={styles.detailText}>Number of days as a member: {calculateDays(user.registration_date_time)} days </Text>
+                {/*<View style={styles.followInfo}>*/}
+                {/*    <Text style={styles.followCount}>{userData.followingCount} Following</Text>*/}
+                {/*    <Text style={styles.followCount}>{userData.followersCount} Followers</Text>*/}
+                {/*</View>*/}
             </View>
 
             <View style={styles.sortButtonsContainer}>
